@@ -1,42 +1,42 @@
-// components/transaction-form.tsx
-'use client'; // Es un componente interactivo, por lo tanto, 'use client'
+// components/transaction-form.tsx - el formulario que el usuario llena, envia los datos a la api
+'use client'; // al ser un componente interactivo, 'use client'
 
 import { useState } from 'react';
 
-export const TransactionForm = () => {
+export const TransactionForm = () => { // componente para el formulario
   // Estados para cada campo del formulario
-  const [userId, setUserId] = useState('user-123');
-  const [fromAccount, setFromAccount] = useState('ACC-001');
-  const [toAccount, setToAccount] = useState('ACC-002');
-  const [amount, setAmount] = useState('100.00');
-  const [currency, setCurrency] = useState('USD');
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [userId, setUserId] = useState('user-123'); // estado para el id del usuario
+  const [fromAccount, setFromAccount] = useState('ACC-001'); // estado para la cuenta de origen
+  const [toAccount, setToAccount] = useState('ACC-002'); // estado para la cuenta de destino
+  const [amount, setAmount] = useState('100.00'); // estado para el monto
+  const [currency, setCurrency] = useState('USD'); // estado para la moneda
+  const [isLoading, setIsLoading] = useState(false); // estado para el loading
+  const [message, setMessage] = useState<string | null>(null); // estado para el mensaje
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevenir que la página se recargue
-    setIsLoading(true);
-    setMessage(null);
+  const handleSubmit = async (e: React.FormEvent) => { // funcion que se ejecuta cuando se envia el formulario
+    e.preventDefault(); // evita que se recargue la pagina
+    setIsLoading(true); // muestra el loading
+    setMessage(null); // limpia el mensaje
 
     try {
-      // ¡Aquí es donde llamamos a nuestra API!
-      const response = await fetch('/api/transactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Aca es donde se llama a la API
+      const response = await fetch('/api/transactions', { // envia los datos al backend
+        method: 'POST', // metodo para enviar los datos
+        headers: { // headers para enviar los datos
+          'Content-Type': 'application/json', // tipo de contenido
         },
-        body: JSON.stringify({
-          userId,
-          fromAccount,
-          toAccount,
-          amount: parseFloat(amount),
-          currency,
+        body: JSON.stringify({ // envia los datos al backend
+          userId, // id del usuario
+          fromAccount, // cuenta de origen
+          toAccount, // cuenta de destino
+          amount: parseFloat(amount), // monto
+          currency, // moneda
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json(); // recibe la respuesta del backend
 
-      if (!response.ok) {
+      if (!response.ok) { // si la respuesta no es ok, lanza un error
         throw new Error(data.error || 'Falló al iniciar la transacción');
       }
 
@@ -45,8 +45,8 @@ export const TransactionForm = () => {
     } catch (err: any) {
       console.error(err);
       setMessage(`Error: ${err.message}`);
-    } finally {
-      setIsLoading(false);
+    } finally { // finalmente, oculta el loading
+      setIsLoading(false); // oculta el loading
     }
   };
 
@@ -56,7 +56,6 @@ export const TransactionForm = () => {
       <p className="text-gray-400 mb-6">Initiate a new banking transaction.</p>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Usamos grid para el layout de 2 columnas como en la maqueta [cite: 83-87] */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="userId" className="block text-sm font-medium text-gray-300">

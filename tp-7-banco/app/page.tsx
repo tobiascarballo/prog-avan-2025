@@ -1,9 +1,9 @@
-// app/page.tsx
+// app/page.tsx - es la web principal que muestra el formulario y el timeline
 import { TransactionForm } from '@/components/transaction-form';
 import { TransactionTimeline } from '@/components/transaction-timeline';
 
 // Esta es la página principal de la app
-export default function HomePage() {
+export default function HomePage() { // componente para la pagina principal
   return (
     <main className="flex min-h-screen flex-col items-center justify-start p-12 bg-gray-950 text-white">
       {/* 1. Título Principal [cite: 78, 79] */}

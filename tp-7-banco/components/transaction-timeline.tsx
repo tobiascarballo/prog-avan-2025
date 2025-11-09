@@ -1,11 +1,11 @@
-// components/transaction-timeline.tsx
+// components/transaction-timeline.tsx - componente que usa el walkie talkie para mostrar los eventos en tiempo real
 'use client';
 
 import { useWebSocket, EventEnvelope } from '@/lib/use-websocket';
 import { useState } from 'react';
 
 // Un componente pequeño para mostrar el estado de la conexión
-const ConnectionStatus = ({ isConnected }: { isConnected: boolean }) => {
+const ConnectionStatus = ({ isConnected }: { isConnected: boolean }) => { // componente para mostrar el estado de la conexion
   return (
     <div className="absolute top-4 right-4 flex items-center space-x-2">
       <span
@@ -22,16 +22,16 @@ const ConnectionStatus = ({ isConnected }: { isConnected: boolean }) => {
 
 // Componente para formatear y mostrar un solo evento
 const EventItem = ({ event }: { event: EventEnvelope }) => {
-  let status = 'default';
-  if (event.type.includes('Committed') || event.type.includes('Notified'))
+  let status = 'default'; // estado para el estado del evento
+  if (event.type.includes('Committed') || event.type.includes('Notified')) // si el tipo de evento incluye "Committed" o "Notified", el estado es success
     status = 'success';
-  if (event.type.includes('Reversed')) status = 'error';
+  if (event.type.includes('Reversed')) status = 'error'; // si el tipo de evento incluye "Reversed", el estado es error
 
   return (
     <li className="mb-4 flex items-start">
       <div
-        className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${
-          status === 'success' ? 'bg-green-500' : 
+        className={`shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${
+          status === 'success' ? 'bg-green-500' :
           status === 'error' ? 'bg-red-500' : 'bg-blue-500'
         } text-white font-semibold`}
       >
@@ -57,11 +57,10 @@ export const TransactionTimeline = () => {
   // Un estado para el User ID, para que podamos pasarlo al hook
   const [userIdToFilter, setUserIdToFilter] = useState('user-123');
   
-  // ¡Aquí usamos nuestro "walkie-talkie"!
-  // Le decimos que se conecte a nuestro servidor en la ruta /ws
+  // Le decimos que se conecte a nuestro servidor en la ruta /ws - se conecta al gateway
   const { isConnected, events, clearEvents } = useWebSocket({
-    url: 'ws://localhost:3000/ws', // La URL que filtramos en el backend
-    userId: userIdToFilter, // Solo muéstrame eventos de este usuario
+    url: 'ws://localhost:3000/ws', // URL del gateway
+    userId: userIdToFilter, // solo muestra eventos de este usuario
   });
 
   return (

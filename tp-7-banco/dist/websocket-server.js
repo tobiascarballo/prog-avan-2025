@@ -49,7 +49,7 @@ exports.startKafkaConsumer = exports.attachWebSocketServer = void 0;
 // lib/websocket-server.ts
 var ws_1 = require("ws");
 var kafka_1 = require("./kafka");
-var url_1 = require("url"); // <-- CAMBIO 1: Importamos 'parse'
+var url_1 = require("url");
 // (Función createWebSocketServer - queda exactamente igual)
 var createWebSocketServer = function () {
     if (global.wsServer) {

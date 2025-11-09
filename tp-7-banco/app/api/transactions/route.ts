@@ -1,34 +1,32 @@
-// app/api/transactions/route.ts
+// app/api/transactions/route.ts - es la API que recibe el fetch del formulario, valida los datos y los pone en txn.commands
 import { NextResponse } from 'next/server';
 import { kafka, KAFKA_TOPIC_COMMANDS } from '@/lib/kafka';
 import { randomUUID } from 'crypto'; // Importamos de Node.js para generar IDs únicos
 
 export async function POST(request: Request) {
-  // Creamos un productor de Kafka.
-  // Para simplicidad, lo creamos y conectamos por cada request.
+  // Creamos un productor de Kafka - para mas simple, lo creamos y conectamos por cada request.
   const producer = kafka.producer();
 
   try {
     // 1. Leer los datos del formulario que nos envió el fetch
     const body = await request.json();
-    const { userId, fromAccount, toAccount, amount, currency } = body;
+    const { userId, fromAccount, toAccount, amount, currency } = body; // desestructura los datos del body
 
     // 2. Validación simple de los datos
-    if (!userId || !fromAccount || !toAccount || !amount || !currency) {
+    if (!userId || !fromAccount || !toAccount || !amount || !currency) { // si falta algun dato, devuelve un error
       return NextResponse.json(
-        { error: 'Todos los campos son requeridos' },
-        { status: 400 }
-      );
+        { error: 'Todos los campos son requeridos' }, // mensaje de error
+        { status: 400 } // codigo de error
+      ); // devuelve un error
     }
 
     // 3. Crear el "Comando" (El mensaje para Kafka)
-    // Usamos la estructura definida en el PDF [cite: 45-58, 61]
     const transactionId = randomUUID(); // Clave de partición 
     const commandId = randomUUID(); // ID único del evento
 
-    const command = {
+    const command = { // crea el comando
       id: commandId,
-      type: 'txn.TransactionInitiated', // Tipo de comando [cite: 61]
+      type: 'txn.TransactionInitiated', // Tipo de comando
       version: 1,
       ts: Date.now(),
       transactionId: transactionId,
@@ -38,36 +36,34 @@ export async function POST(request: Request) {
         toAccount,
         amount,
         currency,
-        userId, // El PDF lo incluye en el payload [cite: 61]
+        userId,
       },
     };
 
     // 4. Conectar el productor y enviar el mensaje a Kafka
     await producer.connect();
     await producer.send({
-      topic: KAFKA_TOPIC_COMMANDS, // Enviamos al tópico de "comandos" [cite: 10]
+      topic: KAFKA_TOPIC_COMMANDS,
       messages: [
         {
-          // ¡CLAVE! Usamos transactionId como 'key' 
-          // Esto asegura que todos los mensajes de esta transacción
-          // vayan a la misma partición y se procesen en orden.
+          // Usamos transactionId como 'key' 
+          // Asegura que todos los mensajes de esta transaccion vayan a la misma partición y se procesen en orden.
           key: transactionId,
-          value: JSON.stringify(command),
+          value: JSON.stringify(command), // convierte el comando a JSON
         },
       ],
     });
 
     console.log(`Comando ${command.type} publicado para ${transactionId}`);
 
-    // 5. Responder al frontend (al TransactionForm)
-    // Enviamos un 202 "Accepted" (Aceptado) porque el procesamiento
-    // será asincrónico.
+    // 5. Responder al frontend (transaction-form)
+    // Enviamos un 202 "Accepted"
     return NextResponse.json(
-      { message: 'Transacción iniciada', transactionId: transactionId },
+      { message: 'Transacción iniciada', transactionId: transactionId }, // mensaje de exito
       { status: 202 }
     );
   } catch (error) {
-    console.error('Error al publicar el comando en Kafka:', error);
+    console.error('Error al publicar el comando en Kafka:', error); // log de error
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
